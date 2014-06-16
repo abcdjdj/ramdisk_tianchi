@@ -62,8 +62,28 @@ if [ -s /dev/keycheck ] || busybox grep -q warmboot=0x77665502 /proc/cmdline ; t
 
 	## DooMLoRD: handle multiple recovery ramdisks based on keypress
 	
-	# default recovery ramdisk is CWM 
+	# default recovery ramdisk is TWRP
 	load_image=/sbin/ramdisk-recovery-twrp.cpio
+	if [ -s /dev/keycheck ]
+	then
+		busybox hexdump < /dev/keycheck > /dev/keycheck1
+
+		export VOLDKEYCHECK=`busybox cat /dev/keycheck1 | busybox grep '0001 0072'`
+
+		busybox rm /dev/keycheck
+		busybox rm /dev/keycheck1
+
+		if [ -n "$VOLDKEYCHECK" ]
+		then
+			#load twrp ramdisk
+			load_image=/sbin/ramdisk-recovery-twrp.cpio
+		else
+			#load cwm ramdisk		
+			load_image=/sbin/ramdisk-recovery-cwm.cpio
+		fi
+
+
+	fi
 
 else
 	busybox echo 'ANDROID BOOT' >>boot.txt
