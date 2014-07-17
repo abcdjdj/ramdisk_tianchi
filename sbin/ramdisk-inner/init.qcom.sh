@@ -1,5 +1,6 @@
 #!/system/bin/sh
 # Copyright (c) 2009-2013, The Linux Foundation. All rights reserved.
+# Copyright (C) 2013 Sony Mobile Communications AB.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -56,9 +57,11 @@ start_charger_monitor()
 		chown -h root.system /sys/module/qpnp_charger/parameters/*
 		chown -h root.system /sys/class/power_supply/battery/input_current_max
 		chown -h root.system /sys/class/power_supply/battery/input_current_trim
+		chown -h root.system /sys/class/power_supply/battery/input_current_settled
 		chown -h root.system /sys/class/power_supply/battery/voltage_min
 		chmod -h 0664 /sys/class/power_supply/battery/input_current_max
 		chmod -h 0664 /sys/class/power_supply/battery/input_current_trim
+		chmod -h 0664 /sys/class/power_supply/battery/input_current_settled
 		chmod -h 0664 /sys/class/power_supply/battery/voltage_min
 		chmod -h 0664 /sys/module/qpnp_charger/parameters/charger_monitor
 		start charger_monitor

@@ -138,22 +138,25 @@ case "$1" in
                 setprop ro.sf.lcd_density 320
                 ;;
         esac
-
-        # Disable the dsds mode for SKUG board
-        platform_subtype=`cat /sys/devices/soc0/platform_subtype` 2> /dev/null
-        case "$platform_subtype" in
-            "SKUG")
-                setprop persist.radio.multisim.config ""
-                ;;
-            *)
-                ;;
-        esac
         ;;
 
-    "msm8610" | "apq8084")
+    "msm8610")
         case "$soc_hwplatform" in
             *)
                 setprop ro.sf.lcd_density 240
+                ;;
+        esac
+        ;;
+    "apq8084")
+        case "$soc_hwplatform" in
+            "Liquid")
+                setprop ro.sf.lcd_density 293
+                # Liquid do not have hardware navigation keys, so enable
+                # Android sw navigation bar
+                setprop ro.hw.nav_keys 0
+                ;;
+            *)
+                setprop ro.sf.lcd_density 440
                 ;;
         esac
         ;;
@@ -163,8 +166,12 @@ esac
 # HDMI can be fb1 or fb2
 # Loop through the sysfs nodes and determine
 # the HDMI(dtv panel)
-for file in /sys/class/graphics/fb*
+for fb_cnt in 0 1 2
 do
+file=/sys/class/graphics/fb$fb_cnt
+dev_file=/dev/graphics/fb$fb_cnt
+  if [ -d "$file" ]
+  then
     value=`cat $file/msm_fb_type`
     case "$value" in
             "dtv panel")
@@ -179,8 +186,14 @@ do
         chmod -h 0664 $file/video_mode
         chmod -h 0664 $file/format_3d
         # create symbolic link
-        ln -s $file /dev/graphics/hdmi
+        ln -s $dev_file /dev/graphics/hdmi
         # Change owner and group for media server and surface flinger
         chown -h system.system $file/format_3d;;
     esac
+  fi
 done
+
+# Set date to a time after 2008
+# This is a workaround for Zygote to preload time related classes properly
+date -s 20090102.130000
+

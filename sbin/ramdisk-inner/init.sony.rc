@@ -1,3 +1,5 @@
+# Copyright (c) 2013 Sony Mobile Communications AB.
+
 import init.sony.usb.rc
 
 on init
@@ -5,6 +7,9 @@ on init
     mount tmpfs tmpfs /tmp nosuid mode=0755,uid=0,gid=0
     chmod 0664 /proc/rdtag
     chown root system /proc/rdtag
+
+on early-fs
+    
 
 on fs
     
@@ -14,33 +19,25 @@ on fs
     chown system system /lta-label
     chmod 0555 /lta-label
 
-# Override the value set in rootdir/init.rc
-
-
-on boot
-    # Configure coredumps
-    
-    
-
-    exec /system/bin/taimport property
-
 on post-fs
     # Change to socket location on libkeyctrl/suntory for /data encryption
     mkdir /dev/socket/suntory 0755 system system
 
 on post-fs-data
     mkdir /data/credmgr 0700 system system
+    mkdir /data/smime 0770 root smime_keystore
+    mkdir /data/pc 0700 radio radio
+    # Remove lost+found in user and userdebug
     mkdir /data/tombstones 0755 system system
     mkdir /data/tombstones/vendor 0755 system system
     mkdir /data/crashsms 0711 system system
     mkdir /data/crashsms/crashes 0755 system system
     mkdir /data/app-skin 0771 system system
-    mkdir /data/smime 0770 root smime_keystore
-    mkdir /data/pc 0700 radio radio
+    
     #SONY_BEGIN (Indication of Mobile Network Information 2.0)
     setprop persist.radio.rat_on legacy
     
-    # Remove lost+found in user and userdebug
+
     exec /system/bin/rm -r /data/lost+found
     
     mkdir /data/lost+found 0770 root root
@@ -51,9 +48,24 @@ on post-fs-data
     
     mkdir /mnt/idd/lost+found 0770 root root
 
+on boot
+    exec /system/bin/taimport property
+
+    # Configurate TCP/IP kernel settings
+    exec /system/bin/sh /system/etc/init.netconfig.sh
+    # Configure coredumps
+    
+    
+
+    # Override the value set in rootdir/init.rc
+    
 
     
 
+on property:dev.bootcomplete=1
+    start fota-snoop
+    start fota-trigger
+    start startup-prober
 
 # klogger and klogrouter service switch
 on property:sys.kernel.log=logcat
@@ -67,6 +79,11 @@ on property:sys.kernel.log=file
 on property:sys.kernel.log=disable
     stop klogger
     stop klogrouter
+
+service startup-prober /system/bin/startup-prober
+    user root
+    oneshot
+    disabled
 
 
 
@@ -82,24 +99,11 @@ service klogrouter /system/bin/kernel_log_redirector logcat
     oneshot
     disabled
 
-on property:dev.bootcomplete=1
-    start fota-snoop
-    start fota-trigger
-
-on property:dev.bootcomplete=1
-    start startup-prober
-
 # Start suntrold
 service suntrold /system/bin/suntrold
     user system
     group system
     oneshot
-    class main
-
-# Start RIC
-service ric /sbin/ric
-    user root
-    group root
     class main
 
 # Start Credential manager daemon
@@ -112,6 +116,13 @@ service credmgrd /system/bin/credmgrd
 #Start crashmonitor native service
 
 
+# Native helper for SuperStamina
+service xssm /system/bin/xssm
+    class main
+    socket xssm stream 0660 root system
+    socket prmd stream 0666 root system
+    socket xssm_wakelock_socket stream 0660 root system
+
 # Sony: FOTA snooping
 service fota-snoop /system/bin/fota-snoop
     group cache
@@ -123,13 +134,6 @@ service fota-trigger /system/bin/fota-trigger
     group cache
     disabled
 
-# Native helper for SuperStamina
-service xssm /system/bin/xssm
-    class main
-    socket xssm stream 0660 root system
-    socket prmd stream 0666 root system
-    socket xssm_wakelock_socket stream 0660 root system
-
 # Start system_monitor
 service system_monitor /system/bin/system_monitor
     socket sysmon stream 0660 root system
@@ -140,19 +144,25 @@ service system_monitor /system/bin/system_monitor
 on property:ro.somc.thermal=system_monitor
     start system_monitor
 
+#modem-debug service to support modem-log-enabler
+
+
 # Fast Dormancy
 service fast-dormancy /system/bin/fast-dormancy
    user root
    group root inet net_raw net_admin
+   socket fastdorm stream 0660 system system
    class main
 
 on property:ro.semc.enable.fast_dormancy=false
    stop fast-dormancy
 
-#modem-debug service to support modem-log-enabler
 
 
-service startup-prober /system/bin/startup-prober
-    user root
-    oneshot
+# bugreport is triggered by holding down volume down, volume up and power
+service bugreport /system/bin/dumpstate -d -p -B \
+        -o /data/data/com.android.shell/files/bugreports/bugreport
+    class main
     disabled
+    oneshot
+    keycodes 114 115 116

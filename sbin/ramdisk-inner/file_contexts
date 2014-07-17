@@ -19,7 +19,6 @@
 # Empty directories
 /lost\+found		u:object_r:rootfs:s0
 /proc			u:object_r:rootfs:s0
-/sys			u:object_r:rootfs:s0
 
 # SELinux policy files
 /file_contexts		u:object_r:rootfs:s0
@@ -151,6 +150,9 @@
 /system/xbin/su		u:object_r:su_exec:s0
 /system/vendor/bin/gpsd u:object_r:gpsd_exec:s0
 /system/bin/ping    u:object_r:ping_exec:s0
+/system/bin/dnsmasq     u:object_r:dnsmasq_exec:s0
+/system/bin/hostapd     u:object_r:hostapd_exec:s0
+/system/bin/clatd	u:object_r:clatd_exec:s0
 #############################
 # Vendor files
 #
@@ -215,3 +217,16 @@
 # asec containers
 /mnt/asec(/.*)?         u:object_r:asec_apk_file:s0
 /data/app-asec(/.*)?    u:object_r:asec_image_file:s0
+#line 1 "device/somc/yukon/sepolicy/file_contexts"
+##########################
+# Devices
+#
+/dev/socket/suntory(/.*)? u:object_r:suntrold_sock_socket:s0
+/dev/socket/tad u:object_r:tad_socket:s0
+
+#############################
+# System files
+#
+/system/bin/sct_service u:object_r:sct_service_exec:s0
+/system/bin/suntrold u:object_r:suntrold_exec:s0
+/system/bin/ta_qmi_service u:object_r:ta_qmi_service_exec:s0

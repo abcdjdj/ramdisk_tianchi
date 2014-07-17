@@ -6,6 +6,11 @@
 # *********************************************************************
 #
 
+# use product specific script if exist.
+if [ -f '/init.usbmode.product.sh' ] ; then
+  exit `/init.usbmode.product.sh`
+fi
+
 TAG="usb"
 VENDOR_ID=0FCE
 PID_PREFIX=0
@@ -81,9 +86,14 @@ set_engpid()
       RMNET_TRANSPORT="smd,bam,hsuart,hsuart"
       ;;
     *)
+      SUPPORT_RMNET=1
       case $1 in
         "mass_storage,adb") PID_PREFIX=6 ;;
         "mtp,adb") PID_PREFIX=5 ;;
+        "rndis,adb")
+        PID_PREFIX=D
+        SUPPORT_RMNET=0
+        ;;
         *)
           /system/bin/log -t ${TAG} -p i "No eng PID for: $1"
           return 1
@@ -96,10 +106,13 @@ set_engpid()
   esac
 
   PID=${PID_PREFIX}146
-  USB_FUNCTION=${1},serial,diag,rmnet
+  USB_FUNCTION=${1},serial,diag
   echo ${DIAG_CLIENT} > /sys/class/android_usb/android0/f_diag/clients
   echo ${SERIAL_TRANSPORT} > /sys/class/android_usb/android0/f_serial/transports
-  echo ${RMNET_TRANSPORT} > /sys/class/android_usb/android0/f_rmnet/transports
+  if [ ${SUPPORT_RMNET}  -eq 1 ] ; then
+    USB_FUNCTION=${USB_FUNCTION},rmnet
+    echo ${RMNET_TRANSPORT} > /sys/class/android_usb/android0/f_rmnet/transports
+  fi
 
   return 0
 }

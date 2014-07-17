@@ -70,9 +70,9 @@ if [ -f /system/etc/init.qcom.sensor.sh ]; then
   /system/bin/sh /system/etc/init.qcom.sensor.sh
 fi
 
-# Run usf script
-if [ -f /system/etc/usf_settings.sh ]; then
-  /system/bin/sh /system/etc/usf_settings.sh
+if $mount_needed ;then
+  /system/bin/restorecon -R /system
+  /system/bin/restorecon -R /data
 fi
 
 touch /system/etc/boot_fixup
