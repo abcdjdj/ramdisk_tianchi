@@ -159,6 +159,10 @@ on property:ro.semc.enable.fast_dormancy=false
 
 
 
+
+
+
+
 # bugreport is triggered by holding down volume down, volume up and power
 service bugreport /system/bin/dumpstate -d -p -B \
         -o /data/data/com.android.shell/files/bugreports/bugreport

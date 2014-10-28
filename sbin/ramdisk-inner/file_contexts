@@ -230,3 +230,9 @@
 /system/bin/sct_service u:object_r:sct_service_exec:s0
 /system/bin/suntrold u:object_r:suntrold_exec:s0
 /system/bin/ta_qmi_service u:object_r:ta_qmi_service_exec:s0
+#line 1 "device/qcom/sepolicy/file_contexts"
+/dev/qseecom      u:object_r:qseecom_device:s0
+/dev/fscklogs(/.*)?      u:object_r:fscklogs:s0
+
+# Persist filesystem
+/persist(/.*)?                    u:object_r:persist_file:s0
