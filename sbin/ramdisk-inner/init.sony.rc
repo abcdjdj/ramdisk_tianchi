@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Sony Mobile Communications AB.
+# Copyright (c) 2013 Sony Mobile Communications Inc.
 
 import init.sony.usb.rc
 
@@ -12,16 +12,16 @@ on early-fs
     
 
 on fs
-    
     mkdir /lta-label 0555 system system
     wait /dev/block/platform/msm_sdcc.1/by-name/LTALabel
-    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/LTALabel /lta-label nosuid nodev noatime noexec ro barrier=0
+    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/LTALabel /lta-label nosuid nodev noatime noexec ro barrier=0 context=u:object_r:lta_label:s0
     chown system system /lta-label
     chmod 0555 /lta-label
 
 on post-fs
     # Change to socket location on libkeyctrl/suntory for /data encryption
     mkdir /dev/socket/suntory 0755 system system
+    mkdir /data/suntory 0755 system system
 
 on post-fs-data
     mkdir /data/credmgr 0700 system system
@@ -29,14 +29,12 @@ on post-fs-data
     mkdir /data/pc 0700 radio radio
     # Remove lost+found in user and userdebug
     mkdir /data/tombstones 0755 system system
-    mkdir /data/tombstones/vendor 0755 system system
-    mkdir /data/crashsms 0711 system system
-    mkdir /data/crashsms/crashes 0755 system system
+    mkdir /data/tombstones/vendor 0775 system system
+    chmod 0775 /data/tombstones/vendor
     mkdir /data/app-skin 0771 system system
     
     #SONY_BEGIN (Indication of Mobile Network Information 2.0)
     setprop persist.radio.rat_on legacy
-    
 
     exec /system/bin/rm -r /data/lost+found
     
@@ -47,12 +45,15 @@ on post-fs-data
     exec /system/bin/rm -r /mnt/idd/lost+found
     
     mkdir /mnt/idd/lost+found 0770 root root
+    mkdir /mnt/idd/output 0755 idd idd
+    mkdir /mnt/idd/socket 0711 idd idd
+    
+    restorecon_recursive /mnt/idd
+
+    # SONY: fast-dormancy
+    mkdir /data/fastdormancy 0770 fastdormancy system
 
 on boot
-    exec /system/bin/taimport property
-
-    # Configurate TCP/IP kernel settings
-    exec /system/bin/sh /system/etc/init.netconfig.sh
     # Configure coredumps
     
     
@@ -68,36 +69,46 @@ on property:dev.bootcomplete=1
     start startup-prober
 
 # klogger and klogrouter service switch
-on property:sys.kernel.log=logcat
-    stop klogger
-    start klogrouter
 
-on property:sys.kernel.log=file
-    stop klogrouter
-    start klogger
 
-on property:sys.kernel.log=disable
-    stop klogger
-    stop klogrouter
+
+
+
 
 service startup-prober /system/bin/startup-prober
     user root
     oneshot
     disabled
+    group sysfs trimarea drmrpc system
+
+# input events logger
 
 
 
 
+
+
+#tcpdump service
+
+
+
+
+
+
+on property:vold.decrypt=trigger_default_encryption
+    start suntrold
 
 # klogger service
-service klogger /system/bin/kernel_log_redirector file
-    oneshot
-    disabled
+
 
 # klogrouter service
-service klogrouter /system/bin/kernel_log_redirector logcat
-    oneshot
-    disabled
+
+
+# input events logger service (output to file)
+
+
+# input events logger service (output to logcat)
+
 
 # Start suntrold
 service suntrold /system/bin/suntrold
@@ -119,9 +130,14 @@ service credmgrd /system/bin/credmgrd
 # Native helper for SuperStamina
 service xssm /system/bin/xssm
     class main
+    user root
+    group root system
     socket xssm stream 0660 root system
     socket prmd stream 0666 root system
     socket xssm_wakelock_socket stream 0660 root system
+
+#Start IDD thermal probe
+
 
 # Sony: FOTA snooping
 service fota-snoop /system/bin/fota-snoop
@@ -139,6 +155,7 @@ service system_monitor /system/bin/system_monitor
     socket sysmon stream 0660 root system
     class core
     user root
+    group trimarea system qcom_diag radio
     disabled
 
 on property:ro.somc.thermal=system_monitor
@@ -149,8 +166,8 @@ on property:ro.somc.thermal=system_monitor
 
 # Fast Dormancy
 service fast-dormancy /system/bin/fast-dormancy
-   user root
-   group root inet net_raw net_admin
+   user fastdormancy
+   group fastdormancy system inet net_raw net_admin qcom_diag radio wifi
    socket fastdorm stream 0660 system system
    class main
 
@@ -170,3 +187,8 @@ service bugreport /system/bin/dumpstate -d -p -B \
     disabled
     oneshot
     keycodes 114 115 116
+
+# Configurate TCP/IP kernel settings
+service mss_update /system/bin/mssconfig
+    class core
+    oneshot

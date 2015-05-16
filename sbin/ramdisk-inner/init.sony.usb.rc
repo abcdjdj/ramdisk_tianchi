@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Sony Mobile Communications AB.
+# Copyright (C) 2013 Sony Mobile Communications Inc.
 
 #
 # init.sony.usb.rc
@@ -9,6 +9,12 @@ on init
     write /sys/class/android_usb/android0/iSerial ${ro.serialno}
     write /sys/class/android_usb/android0/f_rndis/vendorID 0fce
     write /sys/class/android_usb/android0/f_rndis/wceis 1
+
+on fs
+    mkdir /dev/usb-ffs 0770 shell shell
+    mkdir /dev/usb-ffs/adb 0770 shell shell
+    mount functionfs adb /dev/usb-ffs/adb uid=2000,gid=2000
+    write /sys/class/android_usb/android0/f_ffs/aliases adb
 
 on post-fs-data
     write /sys/class/android_usb/android0/f_mass_storage/inquiry_string "SONY    Mass Storage    0100"
@@ -83,5 +89,7 @@ on property:sys.usb.config=ncm,adb
 
 # Start usbeng
 service usbeng /system/bin/usbeng
+    user system
+    group system
     class late_start
     oneshot
