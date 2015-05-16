@@ -136,9 +136,9 @@ on boot
     # Do not power down SIM in flight mode (required for Wi-Fi EAP-SIM)
     setprop persist.radio.apm_sim_not_pwdn 1
 
-    # Enable Sony RIC
+    # Disable Sony RIC
     mount securityfs securityfs /sys/kernel/security nosuid nodev noexec
-    write /sys/kernel/security/sony_ric/enable 1
+    write /sys/kernel/security/sony_ric/enable 0
 
     # Touch
     chown system system /data/touch/tfswinfo/default.tfswinfo
