@@ -56,7 +56,6 @@ on post-fs-data
 on boot
     # Configure coredumps
     
-    
 
     # Override the value set in rootdir/init.rc
     
@@ -79,7 +78,7 @@ service startup-prober /system/bin/startup-prober
     user root
     oneshot
     disabled
-    group sysfs trimarea drmrpc system
+    group sysfs trimarea drmrpc system credmgr_client
 
 # input events logger
 
@@ -90,6 +89,21 @@ service startup-prober /system/bin/startup-prober
 
 #tcpdump service
 
+
+#service to let Service Menu get and set Wlan antenna mode
+service sm_svc_get /system/bin/sm_native_svc GetWlanAntennaMode
+    oneshot
+    disabled
+
+service sm_svc_set /system/bin/sm_native_svc SetWlanAntennaMode
+    oneshot
+    disabled
+
+on property:wlan.antenna_mode.action=get
+    start sm_svc_get
+
+on property:wlan.antenna_mode.action=set
+    start sm_svc_set
 
 
 
@@ -187,6 +201,9 @@ service bugreport /system/bin/dumpstate -d -p -B \
     disabled
     oneshot
     keycodes 114 115 116
+
+# Diskwrite IDD probe
+
 
 # Configurate TCP/IP kernel settings
 service mss_update /system/bin/mssconfig

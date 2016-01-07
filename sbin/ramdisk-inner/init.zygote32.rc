@@ -1,5 +1,5 @@
 service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
-    setenv LD_PRELOAD /system/lib/stamina.so:libsigchain.so:libNimsWrap.so
+    setenv LD_PRELOAD stamina.so:libsigchain.so:libNimsWrap.so
     class main
     socket zygote stream 660 root system
     onrestart exec /system/bin/clmcheck -s init -n zygote

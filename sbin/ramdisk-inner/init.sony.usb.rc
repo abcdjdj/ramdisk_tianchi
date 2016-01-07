@@ -31,7 +31,7 @@ on boot
     write /sys/class/android_usb/android0/iProduct ${ro.product.model}
 
     # Disable C_A_D
-    exec system/bin/ctrlaltdel soft
+    write /proc/sys/kernel/ctrl-alt-del 0
 
     
 

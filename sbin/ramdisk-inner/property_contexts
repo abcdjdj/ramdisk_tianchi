@@ -50,6 +50,10 @@ selinux.                u:object_r:security_prop:s0
 vold.                   u:object_r:vold_prop:s0
 crypto.                 u:object_r:vold_prop:s0
 
+# ro.build.fingerprint is either set in /system/build.prop, or is
+# set at runtime by system_server.
+build.fingerprint       u:object_r:fingerprint_prop:s0
+
 # ctl properties
 ctl.bootanim            u:object_r:ctl_bootanim_prop:s0
 ctl.dumpstate           u:object_r:ctl_dumpstate_prop:s0
@@ -75,6 +79,7 @@ persist.service.adb.enable      u:object_r:usb_adb_enable_prop:s0
 adb.secure        u:object_r:adb_secure_prop:s0
 sony.color_id     u:object_r:sony_colorid_prop:s0
 device.color.prof u:object_r:device_color_prof_prop:s0
+sony.serialno     u:object_r:sony_serialno_prop:s0
 #line 1 "vendor/semc/system/sepolicy/DRM_Agent_Widevine_L1/1.0.0/system_server/property_contexts"
 somc.hdcp. u:object_r:somc_hdcp_prop:s0
 #line 1 "vendor/semc/system/sepolicy/Fota/1.0.0/recovery/property_contexts"
@@ -87,6 +92,8 @@ sys.wireless_charging  u:object_r:sys_wireless_charging_prop:s0
 #line 1 "vendor/semc/system/sepolicy/MHL_Demo_Mode/1.0.0/property_contexts"
 persist.demo.           u:object_r:system_prop:s0
 
+#line 1 "vendor/semc/system/sepolicy/Power_Save/1.0.0/property_contexts"
+sys.lcd_fpks u:object_r:xssm_lcd_fpks_prop:s0
 #line 1 "vendor/semc/system/sepolicy/System_Debug/1_0_0/property_contexts"
 sys.somc.thermal.state                 u:object_r:lota_prop:s0
 #line 1 "vendor/semc/system/sepolicy/Touch/1.0.0/property/property_contexts"
@@ -97,3 +104,8 @@ usb_uicc.                  u:object_r:uicc_prop:s0
 sys.ims.                   u:object_r:qcom_ims_prop:s0
 dolby.audio.               u:object_r:audio_prop:s0
 sys.usf.                   u:object_r:usf_prop:s0
+radio.atfwd.               u:object_r:radio_prop:s0
+camera.                    u:object_r:camera_prop:s0
+persist.camera.            u:object_r:camera_prop:s0
+persist.bluetooth.         u:object_r:bluetooth_prop:s0
+wifi.change_nv_owner       u:object_r:qti_wlan_prop:s0

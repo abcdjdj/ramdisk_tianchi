@@ -103,7 +103,7 @@ sip                                       u:object_r:radio_service:s0
 statusbar                                 u:object_r:system_server_service:s0
 SurfaceFlinger                            u:object_r:surfaceflinger_service:s0
 task                                      u:object_r:system_server_service:s0
-telecom                                   u:object_r:radio_service:s0
+telecom                                   u:object_r:system_server_service:s0
 telephony.registry                        u:object_r:system_server_service:s0
 textservices                              u:object_r:system_server_service:s0
 trust                                     u:object_r:system_server_service:s0
@@ -136,6 +136,7 @@ media.cacao                               u:object_r:mediaserver_service:s0
 #line 1 "vendor/semc/system/sepolicy/Power_Save/1.0.0/service_contexts"
 xperiaappdepinfo                                       u:object_r:xperiaappdepinfo_service:s0
 xperia_power                                           u:object_r:xperia_power_service:s0
+stamina_qbd                                            u:object_r:stamina_qbd_service:s0
 #line 1 "vendor/semc/system/sepolicy/Touch/1.0.0/tfsw/service_contexts"
 tfsw                                      u:object_r:tfsw_service:s0
 #line 1 "device/qcom/sepolicy/common/service_contexts"
